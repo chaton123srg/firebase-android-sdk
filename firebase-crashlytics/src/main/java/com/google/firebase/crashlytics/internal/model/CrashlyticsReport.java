@@ -459,6 +459,12 @@ public abstract class CrashlyticsReport {
       public abstract Organization getOrganization();
 
       @Nullable
+      public abstract Process getProcess();
+
+      @Nullable
+      public abstract ImmutableList<Process> getAppProcesses();
+
+      @Nullable
       public abstract String getInstallationUuid();
 
       @Nullable
@@ -490,6 +496,12 @@ public abstract class CrashlyticsReport {
 
         @NonNull
         public abstract Builder setDisplayVersion(@NonNull String displayVersion);
+
+        @NonNull
+        public abstract Builder setProcess(@NonNull Process process);
+
+        @NonNull
+        public abstract Builder setAppProcesses(@NonNull ImmutableList<Process> appProcesses);
 
         @NonNull
         public abstract Builder setOrganization(@NonNull Organization value);
@@ -531,6 +543,37 @@ public abstract class CrashlyticsReport {
 
           @NonNull
           public abstract Organization build();
+        }
+      }
+
+      @AutoValue
+      public abstract static class Process {
+        @NonNull
+        public abstract String getName();
+
+        public abstract int getImportance();
+
+        public abstract boolean getIsDefaultProcess();
+
+        @NonNull
+        public static Builder builder() {
+          return new AutoValue_CrashlyticsReport_Session_Application_Process.Builder();
+        }
+
+        /** Builder for {@link Process}. */
+        @AutoValue.Builder
+        public abstract static class Builder {
+          @NonNull
+          public abstract Builder setName(@NonNull String name);
+
+          @NonNull
+          public abstract Builder setImportance(int importance);
+
+          @NonNull
+          public abstract Builder setIsDefaultProcess(boolean isDefaultProcess);
+
+          @NonNull
+          public abstract Process build();
         }
       }
     }
