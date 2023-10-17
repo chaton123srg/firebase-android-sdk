@@ -551,6 +551,8 @@ public abstract class CrashlyticsReport {
         @NonNull
         public abstract String getName();
 
+        public abstract int getPid();
+
         public abstract int getImportance();
 
         public abstract boolean getIsDefaultProcess();
@@ -565,6 +567,9 @@ public abstract class CrashlyticsReport {
         public abstract static class Builder {
           @NonNull
           public abstract Builder setName(@NonNull String name);
+
+          @NonNull
+          public abstract Builder setPid(int pid);
 
           @NonNull
           public abstract Builder setImportance(int importance);
