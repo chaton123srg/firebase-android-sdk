@@ -25,6 +25,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.text.TextUtils;
 import com.google.firebase.crashlytics.BuildConfig;
+import com.google.firebase.crashlytics.internal.ProcessDetails;
 import com.google.firebase.crashlytics.internal.model.CrashlyticsReport;
 import com.google.firebase.crashlytics.internal.model.CrashlyticsReport.Architecture;
 import com.google.firebase.crashlytics.internal.model.CrashlyticsReport.Session.Event;
@@ -71,6 +72,7 @@ public class CrashlyticsReportDataCapture {
   private final AppData appData;
   private final StackTraceTrimmingStrategy stackTraceTrimmingStrategy;
   private final SettingsProvider settingsProvider;
+  private final ProcessDetails processDetails = ProcessDetails.INSTANCE;
 
   public CrashlyticsReportDataCapture(
       Context context,
@@ -192,6 +194,8 @@ public class CrashlyticsReportDataCapture {
             .setVersion(appData.versionCode)
             .setDisplayVersion(appData.versionName)
             .setInstallationUuid(idManager.getInstallIds().getCrashlyticsInstallId())
+            .setProcess(processDetails.getProcess(context))
+            .setAppProcesses(processDetails.getAppProcesses(context))
             .setDevelopmentPlatform(appData.developmentPlatformProvider.getDevelopmentPlatform())
             .setDevelopmentPlatformVersion(
                 appData.developmentPlatformProvider.getDevelopmentPlatformVersion());

@@ -18,6 +18,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.auto.value.AutoValue;
+import com.google.firebase.crashlytics.internal.model.CrashlyticsReport.Session.Application;
 import com.google.firebase.crashlytics.internal.model.CrashlyticsReport.Session.Event;
 import com.google.firebase.crashlytics.internal.model.CrashlyticsReport.Session.Event.Application.Execution.Thread.Frame;
 import com.google.firebase.encoders.annotations.Encodable;
@@ -198,6 +199,18 @@ public abstract class CrashlyticsReport {
     return builder.build();
   }
 
+  /** Augment an existing {@link CrashlyticsReport} with the given process details. */
+  @NonNull
+  public CrashlyticsReport withProcessDetails(
+      @NonNull Application.Process process,
+      @NonNull ImmutableList<Application.Process> appProcesses) {
+    Builder builder = toBuilder();
+    if (getSession() != null) {
+      builder.setSession(getSession().withProcessDetails(process, appProcesses));
+    }
+    return builder.build();
+  }
+
   /** Update an existing {@link CrashlyticsReport} with the given firebaseInstallationId. */
   @NonNull
   public CrashlyticsReport withFirebaseInstallationId(@Nullable String firebaseInstallationId) {
@@ -366,6 +379,15 @@ public abstract class CrashlyticsReport {
       return toBuilder().setAppQualitySessionId(appQualitySessionId).build();
     }
 
+    /** Augment an existing {@link Session} with the given process details. */
+    @NonNull
+    public Session withProcessDetails(
+        @NonNull Application.Process process,
+        @NonNull ImmutableList<Application.Process> appProcesses) {
+      Application app = getApp().withProcessDetails(process, appProcesses);
+      return toBuilder().setApp(app).build();
+    }
+
     /** Builder for {@link Session}. */
     @AutoValue.Builder
     public abstract static class Builder {
@@ -482,6 +504,14 @@ public abstract class CrashlyticsReport {
         final Organization.Builder builder =
             (organization != null) ? organization.toBuilder() : Organization.builder();
         return toBuilder().setOrganization(builder.setClsId(organizationId).build()).build();
+      }
+
+      /** Augment an existing {@link Application} with the given process details. */
+      @NonNull
+      public Application withProcessDetails(
+          @NonNull Application.Process process,
+          @NonNull ImmutableList<Application.Process> appProcesses) {
+        return toBuilder().setProcess(process).setAppProcesses(appProcesses).build();
       }
 
       /** Builder for {@link Application}. */

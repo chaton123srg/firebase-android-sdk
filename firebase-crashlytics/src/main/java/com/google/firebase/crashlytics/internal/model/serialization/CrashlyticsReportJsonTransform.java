@@ -309,6 +309,38 @@ public class CrashlyticsReportJsonTransform {
   }
 
   @NonNull
+  private static CrashlyticsReport.Session.Application.Process parseProcess(
+      @NonNull JsonReader jsonReader) throws IOException {
+    CrashlyticsReport.Session.Application.Process.Builder builder =
+        CrashlyticsReport.Session.Application.Process.builder();
+
+    jsonReader.beginObject();
+    while (jsonReader.hasNext()) {
+      String name = jsonReader.nextName();
+      switch (name) {
+        case "name":
+          builder.setName(jsonReader.nextString());
+          break;
+        case "pid":
+          builder.setPid(jsonReader.nextInt());
+          break;
+        case "importance":
+          builder.setImportance(jsonReader.nextInt());
+          break;
+        case "isDefaultProcess":
+          builder.setIsDefaultProcess(jsonReader.nextBoolean());
+          break;
+        default:
+          jsonReader.skipValue();
+          break;
+      }
+    }
+    jsonReader.endObject();
+
+    return builder.build();
+  }
+
+  @NonNull
   private static CrashlyticsReport.Session.Application parseApp(@NonNull JsonReader jsonReader)
       throws IOException {
     final CrashlyticsReport.Session.Application.Builder builder =
@@ -329,6 +361,13 @@ public class CrashlyticsReportJsonTransform {
           break;
         case "installationUuid":
           builder.setInstallationUuid(jsonReader.nextString());
+          break;
+        case "process":
+          builder.setProcess(parseProcess(jsonReader));
+          break;
+        case "appProcesses":
+          builder.setAppProcesses(
+              parseArray(jsonReader, CrashlyticsReportJsonTransform::parseProcess));
           break;
         case "developmentPlatform":
           builder.setDevelopmentPlatform(jsonReader.nextString());

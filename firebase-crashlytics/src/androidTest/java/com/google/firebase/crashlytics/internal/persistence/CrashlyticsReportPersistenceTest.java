@@ -775,6 +775,59 @@ public class CrashlyticsReportPersistenceTest extends CrashlyticsTestCase {
         finalizedReport);
   }
 
+  public void testPersistEvent_withProcessDetails_includeProcessDetails() {
+    CrashlyticsReportPersistence reportPersistence =
+        new CrashlyticsReportPersistence(
+            fileStore,
+            createSettingsProviderMock(VERY_LARGE_UPPER_LIMIT, VERY_LARGE_UPPER_LIMIT),
+            createSessionsSubscriberMock(APP_QUALITY_SESSION_ID));
+
+    Application.Process process1 =
+        Application.Process.builder()
+            .setName("name1")
+            .setPid(12)
+            .setImportance(100)
+            .setIsDefaultProcess(true)
+            .build();
+    Application.Process process2 =
+        Application.Process.builder()
+            .setName("name2")
+            .setPid(23)
+            .setImportance(50)
+            .setIsDefaultProcess(false)
+            .build();
+
+    String sessionId = "testSession";
+    CrashlyticsReport testReport =
+        makeTestReport(sessionId)
+            .withProcessDetails(process1, ImmutableList.from(process1, process2));
+    CrashlyticsReport.Session.Event testEvent1 = makeTestEvent("type1", "reason1");
+    CrashlyticsReport.Session.Event testEvent2 = makeTestEvent("type2", "reason2");
+    CrashlyticsReport.Session.Event testEvent3 = makeTestEvent("type3", "reason3");
+
+    reportPersistence.persistReport(testReport);
+    reportPersistence.persistEvent(testEvent1, sessionId);
+    reportPersistence.persistEvent(testEvent2, sessionId);
+    reportPersistence.persistEvent(testEvent3, sessionId);
+
+    long endedAt = System.currentTimeMillis();
+
+    reportPersistence.finalizeReports(null, endedAt);
+
+    List<CrashlyticsReportWithSessionId> finalizedReports =
+        reportPersistence.loadFinalizedReports();
+    assertEquals(1, finalizedReports.size());
+    CrashlyticsReport finalizedReport = finalizedReports.get(0).getReport();
+    assertNotNull(finalizedReport.getSession());
+    assertEquals(
+        testReport
+            .withSessionEndFields(endedAt, false, null)
+            .withAppQualitySessionId(APP_QUALITY_SESSION_ID)
+            .withProcessDetails(process1, ImmutableList.from(process1, process2))
+            .withEvents(ImmutableList.from(testEvent1, testEvent2, testEvent3)),
+        finalizedReport);
+  }
+
   private static void persistReportWithEvent(
       CrashlyticsReportPersistence reportPersistence, String sessionId, boolean isHighPriority) {
     CrashlyticsReport testReport = makeTestReport(sessionId);
